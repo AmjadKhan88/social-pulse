@@ -1,0 +1,355 @@
+// prisma/schema.prisma
+// Social Network Platform — Full Database Schema
+// Day 1: Foundation
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// USER MODEL
+// ─────────────────────────────────────────
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  username       String   @unique
+  passwordHash   String
+  displayName    String
+  bio            String?
+  avatarUrl      String?
+  coverUrl       String?
+  isVerified     Boolean  @default(false)
+  isOnline       Boolean  @default(false)
+  lastSeen       DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Privacy settings (embedded as relation)
+  privacySettings PrivacySettings?
+
+  // Relations
+  posts                Post[]
+  comments             Comment[]
+  likes                Like[]
+  reactions            Reaction[]
+
+  // Friend requests sent/received
+  sentFriendRequests     FriendRequest[] @relation("FriendRequestSender")
+  receivedFriendRequests FriendRequest[] @relation("FriendRequestReceiver")
+
+  // Friendships (bidirectional via join table)
+  friendshipsA Friendship[] @relation("FriendA")
+  friendshipsB Friendship[] @relation("FriendB")
+
+  // Notifications
+  notifications         Notification[] @relation("NotificationRecipient")
+  triggeredNotifications Notification[] @relation("NotificationTrigger")
+
+  // Refresh tokens
+  refreshTokens RefreshToken[]
+
+  // Media uploads
+  media Media[]
+
+  // Blocked users
+  blockedUsers Block[] @relation("BlockingUser")
+  blockedBy    Block[] @relation("BlockedUser")
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────────
+// PRIVACY SETTINGS
+// ─────────────────────────────────────────
+model PrivacySettings {
+  id                String          @id @default(cuid())
+  userId            String          @unique
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  profileVisibility ProfileVisibility @default(PUBLIC)
+  postDefaultAudience PostAudience   @default(PUBLIC)
+  whoCanSendFriendRequest FriendRequestPrivacy @default(EVERYONE)
+  whoCanSeeEmail    EmailPrivacy    @default(FRIENDS)
+  showOnlineStatus  Boolean         @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("privacy_settings")
+}
+
+// ─────────────────────────────────────────
+// POSTS
+// ─────────────────────────────────────────
+model Post {
+  id        String      @id @default(cuid())
+  authorId  String
+  author    User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  content   String?
+  audience  PostAudience @default(PUBLIC)
+  isEdited  Boolean     @default(false)
+  isPinned  Boolean     @default(false)
+
+  // Attachments via Media table
+  media     PostMedia[]
+
+  comments  Comment[]
+  likes     Like[]
+  reactions Reaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("posts")
+}
+
+// ─────────────────────────────────────────
+// MEDIA
+// ─────────────────────────────────────────
+model Media {
+  id          String    @id @default(cuid())
+  uploaderId  String
+  uploader    User      @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+
+  url         String
+  publicId    String    // Cloudinary public_id
+  mediaType   MediaType
+  width       Int?
+  height      Int?
+  duration    Float?    // For videos, in seconds
+  sizeBytes   Int?
+  altText     String?
+
+  // Relation to post (optional — could be used standalone)
+  postMedia PostMedia[]
+
+  createdAt DateTime @default(now())
+
+  @@map("media")
+}
+
+model PostMedia {
+  id      String @id @default(cuid())
+  postId  String
+  post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  mediaId String
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  order   Int    @default(0)
+
+  @@unique([postId, mediaId])
+  @@map("post_media")
+}
+
+// ─────────────────────────────────────────
+// COMMENTS
+// ─────────────────────────────────────────
+model Comment {
+  id       String  @id @default(cuid())
+  postId   String
+  post     Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId String
+  author   User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  content  String
+  isEdited Boolean @default(false)
+
+  // Nested comments
+  parentId String?
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies  Comment[] @relation("CommentReplies")
+
+  likes    Like[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("comments")
+}
+
+// ─────────────────────────────────────────
+// LIKES
+// ─────────────────────────────────────────
+model Like {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Polymorphic: either post or comment
+  postId    String?
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentId String?
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@unique([userId, commentId])
+  @@map("likes")
+}
+
+// ─────────────────────────────────────────
+// REACTIONS (extended emoji reactions)
+// ─────────────────────────────────────────
+model Reaction {
+  id           String       @id @default(cuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId       String
+  post         Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reactionType ReactionType
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@map("reactions")
+}
+
+// ─────────────────────────────────────────
+// FRIEND REQUESTS
+// ─────────────────────────────────────────
+model FriendRequest {
+  id         String              @id @default(cuid())
+  senderId   String
+  sender     User                @relation("FriendRequestSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User                @relation("FriendRequestReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  status     FriendRequestStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([senderId, receiverId])
+  @@map("friend_requests")
+}
+
+// ─────────────────────────────────────────
+// FRIENDSHIPS (accepted connections)
+// ─────────────────────────────────────────
+model Friendship {
+  id      String @id @default(cuid())
+  userAId String
+  userA   User   @relation("FriendA", fields: [userAId], references: [id], onDelete: Cascade)
+  userBId String
+  userB   User   @relation("FriendB", fields: [userBId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userAId, userBId])
+  @@map("friendships")
+}
+
+// ─────────────────────────────────────────
+// NOTIFICATIONS
+// ─────────────────────────────────────────
+model Notification {
+  id          String           @id @default(cuid())
+  recipientId String
+  recipient   User             @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  triggerId   String?
+  trigger     User?            @relation("NotificationTrigger", fields: [triggerId], references: [id], onDelete: SetNull)
+
+  type        NotificationType
+  entityId    String?          // postId, commentId, friendRequestId, etc.
+  entityType  String?          // "post", "comment", "friend_request", etc.
+  message     String
+  isRead      Boolean          @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+// ─────────────────────────────────────────
+// REFRESH TOKENS
+// ─────────────────────────────────────────
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+}
+
+// ─────────────────────────────────────────
+// BLOCKS
+// ─────────────────────────────────────────
+model Block {
+  id          String @id @default(cuid())
+  blockingId  String
+  blocking    User   @relation("BlockingUser", fields: [blockingId], references: [id], onDelete: Cascade)
+  blockedId   String
+  blocked     User   @relation("BlockedUser", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([blockingId, blockedId])
+  @@map("blocks")
+}
+
+// ─────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────
+enum ProfileVisibility {
+  PUBLIC
+  FRIENDS
+  PRIVATE
+}
+
+enum PostAudience {
+  PUBLIC
+  FRIENDS
+  ONLY_ME
+}
+
+enum FriendRequestPrivacy {
+  EVERYONE
+  FRIENDS_OF_FRIENDS
+  NOBODY
+}
+
+enum EmailPrivacy {
+  PUBLIC
+  FRIENDS
+  ONLY_ME
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  GIF
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  COMMENT_LIKE
+  FRIEND_REQUEST
+  FRIEND_ACCEPT
+  REACTION
+  MENTION
+  SYSTEM
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  HAHA
+  WOW
+  SAD
+  ANGRY
+}

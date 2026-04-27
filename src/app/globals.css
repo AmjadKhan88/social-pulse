@@ -1,0 +1,216 @@
+/* src/app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────
+   CSS Custom Properties (Design Tokens)
+   ───────────────────────────────────────── */
+:root {
+  /* Brand */
+  --brand-primary:   #6366f1;
+  --brand-secondary: #8b5cf6;
+  --brand-accent:    #ec4899;
+
+  /* Surfaces */
+  --surface:         #ffffff;
+  --surface-subtle:  #f8fafc;
+  --surface-muted:   #f1f5f9;
+  --surface-border:  #e2e8f0;
+
+  /* Text */
+  --text-primary:    #0f172a;
+  --text-secondary:  #475569;
+  --text-muted:      #94a3b8;
+
+  /* Status */
+  --color-success:   #22c55e;
+  --color-warning:   #f59e0b;
+  --color-error:     #ef4444;
+  --color-info:      #3b82f6;
+
+  /* Radius */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   14px;
+  --radius-xl:   20px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm:   0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md:   0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg:   0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Transitions */
+  --transition-fast:   150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow:   400ms ease;
+}
+
+/* Dark mode overrides */
+.dark {
+  --surface:        #0f172a;
+  --surface-subtle: #1e293b;
+  --surface-muted:  #334155;
+  --surface-border: #475569;
+  --text-primary:   #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted:     #64748b;
+}
+
+/* ─────────────────────────────────────────
+   Base Reset & Defaults
+   ───────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--surface-subtle);
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Better focus styles */
+  :focus-visible {
+    outline: 2px solid var(--brand-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  /* Typography defaults */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* ─────────────────────────────────────────
+   Component Layer
+   ───────────────────────────────────────── */
+@layer components {
+  /* Card */
+  .card {
+    @apply bg-white rounded-xl border border-slate-200 shadow-card;
+  }
+
+  .dark .card {
+    @apply bg-slate-900 border-slate-700/50;
+  }
+
+  /* Glass effect */
+  .glass {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    @apply animate-pulse bg-slate-200 rounded;
+  }
+
+  /* Divider */
+  .divider {
+    @apply border-t border-slate-200 my-4;
+  }
+
+  /* Online status indicator */
+  .status-online {
+    @apply w-3 h-3 bg-emerald-500 rounded-full border-2 border-white ring-2 ring-emerald-500/20;
+  }
+
+  .status-offline {
+    @apply w-3 h-3 bg-slate-400 rounded-full border-2 border-white;
+  }
+
+  /* Reaction button */
+  .reaction-btn {
+    @apply flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
+           text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer
+           select-none;
+  }
+
+  .reaction-btn.active {
+    @apply text-brand-600 bg-brand-50 hover:bg-brand-100;
+  }
+}
+
+/* ─────────────────────────────────────────
+   Utility Layer
+   ───────────────────────────────────────── */
+@layer utilities {
+  /* Text gradient */
+  .text-gradient {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Brand gradient background */
+  .bg-brand-gradient {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  }
+
+  /* Truncate with multiple lines */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* No scrollbar */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Prevent text selection */
+  .no-select { user-select: none; }
+}
