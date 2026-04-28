@@ -1,6 +1,6 @@
 // src/middleware.ts
 import { NextRequest, NextResponse } from "next/server";
-import { verifyAccessToken, verifyRefreshToken } from "@/lib/auth";
+import { verifyAccessToken, verifyRefreshToken } from "./lib/auth";
 
 // Routes that require authentication
 const PROTECTED_ROUTES = [

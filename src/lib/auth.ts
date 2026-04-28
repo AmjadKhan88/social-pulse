@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import type { JWTPayload, AuthUser } from "@/types";
+import type { JWTPayload, AuthUser } from "../types/index";
 
 const ACCESS_SECRET  = process.env.JWT_ACCESS_SECRET!;
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
@@ -138,7 +138,7 @@ export function forbiddenResponse(message = "Forbidden"): NextResponse {
 }
 
 // Extend JWTPayload to include user fields we embed in the token
-declare module "@/types" {
+declare module "../types" {
   interface JWTPayload {
     displayName?: string;
     avatarUrl?: string | null;
