@@ -2,7 +2,7 @@
 "use client";
 
 import Image from "next/image";
-import { cn, getInitials, getAvatarUrl } from "@/lib/utils";
+import { cn, getInitials, getAvatarUrl } from "../../lib/utils";
 
 export interface AvatarProps {
   src?: string | null;
