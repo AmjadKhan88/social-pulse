@@ -192,6 +192,9 @@
     background: linear-gradient(135deg, #6366f1, #8b5cf6);
   }
 
+  /* Map `border-border` to the design token so `@apply border-border` works */
+  .border-border { border-color: var(--surface-border); }
+
   /* Truncate with multiple lines */
   .line-clamp-2 {
     display: -webkit-box;

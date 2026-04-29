@@ -10,6 +10,8 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Generic border color mapped to CSS variable for `border-border`
+        border: "var(--surface-border)",
         // Brand palette
         brand: {
           50:  "#eef2ff",

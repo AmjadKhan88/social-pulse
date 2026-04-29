@@ -8,10 +8,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-hot-toast";
 import { Eye, EyeOff, Zap, Check, X } from "lucide-react";
-import { registerSchema, type RegisterInput } from "@/lib/validations";
-import { useAuthStore } from "@/store/auth.store";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { registerSchema, type RegisterInput } from "../../../lib/validations";
+import { useAuthStore } from "../../../store/auth.store";
+import { Button } from "../../../components/ui/Button";
+import { Input } from "../../../components/ui/Input";
 
 const passwordRules = [
   { label: "At least 8 characters", test: (p: string) => p.length >= 8 },
