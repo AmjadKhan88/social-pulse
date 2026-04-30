@@ -1,12 +1,12 @@
 // src/app/api/auth/logout/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db } from "../../../../lib/db";
 import {
   clearAuthCookies,
   getRefreshTokenFromRequest,
   getTokenFromRequest,
   verifyAccessToken,
-} from "@/lib/auth";
+} from "../../../../lib/auth";
 
 export async function POST(req: NextRequest) {
   try {

@@ -1,13 +1,13 @@
 // src/app/api/auth/refresh/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db } from "../../../../lib/db";
 import {
   verifyRefreshToken,
   signAccessToken,
   signRefreshToken,
   setAuthCookies,
   getRefreshTokenFromRequest,
-} from "@/lib/auth";
+} from "../../../../lib/auth";
 
 export async function POST(req: NextRequest) {
   try {

@@ -1,13 +1,13 @@
 // src/app/api/auth/login/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db } from "../../../../lib/db";
 import {
   verifyPassword,
   signAccessToken,
   signRefreshToken,
   setAuthCookies,
-} from "@/lib/auth";
-import { loginSchema } from "@/lib/validations";
+} from "../../../../lib/auth";
+import { loginSchema } from "../../../../lib/validations";
 import { ZodError } from "zod";
 
 export async function POST(req: NextRequest) {
