@@ -9,13 +9,13 @@ import {
   MapPin, Calendar, Link as LinkIcon, MoreHorizontal,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { Avatar } from "@/components/ui/Avatar";
-import { Button } from "@/components/ui/Button";
-import { PostCard } from "@/components/posts/PostCard";
-import { EditProfileModal } from "@/components/profile/EditProfileModal";
-import { useAuthStore } from "@/store/auth.store";
-import { formatRelativeTime, formatCount, getAvatarUrl } from "@/lib/utils";
-import type { UserProfile, Post } from "@/types";
+import { Avatar } from "../../../../components/ui/Avatar";
+import { Button } from "../../../../components/ui/Button";
+import { PostCard } from "../../../../components/posts/PostCard";
+import { EditProfileModal } from "../../../../components/profile/EditProfileModal";
+import { useAuthStore } from "../../../../store/auth.store";
+import { formatRelativeTime, formatCount, getAvatarUrl } from "../../../../lib/utils";
+import type { UserProfile, Post } from "../../../../types";
 
 type Props = { params: Promise<{ id: string }> };
 
