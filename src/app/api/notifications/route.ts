@@ -1,8 +1,8 @@
 // src/app/api/notifications/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { getTokenFromRequest, verifyAccessToken, unauthorizedResponse } from "@/lib/auth";
-import { paginationSchema } from "@/lib/validations";
+import { db } from "../../../lib/db";
+import { getTokenFromRequest, verifyAccessToken, unauthorizedResponse } from "../../../lib/auth";
+import { paginationSchema } from "../../../lib/validations";
 
 // GET /api/notifications
 export async function GET(req: NextRequest) {

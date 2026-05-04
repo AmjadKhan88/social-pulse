@@ -4,11 +4,11 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { Bell, Heart, MessageCircle, UserPlus, Check } from "lucide-react";
-import { Avatar } from "@/components/ui/Avatar";
-import { Button } from "@/components/ui/Button";
-import { useNotificationStore } from "@/store/notification.store";
-import { formatRelativeTime } from "@/lib/utils";
-import type { Notification, NotificationType } from "@/types";
+import { Avatar } from "../../components/ui/Avatar";
+import { Button } from "../../components/ui/Button";
+import { useNotificationStore } from "../../store/notification.store";
+import { formatRelativeTime } from "../../lib/utils";
+import type { Notification, NotificationType } from "../../types";
 
 const ICONS: Record<NotificationType, React.ReactNode> = {
   LIKE:           <Heart      size={14} className="text-red-500" />,

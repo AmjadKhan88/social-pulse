@@ -2,7 +2,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { Notification } from "@/types";
+import type { Notification } from "../types";
 
 interface NotificationState {
   notifications: Notification[];
