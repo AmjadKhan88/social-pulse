@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getTokenFromRequest, verifyAccessToken, unauthorizedResponse, forbiddenResponse } from "@/lib/auth";
 import { updatePostSchema } from "@/lib/validations";
-import { postSelect } from "../route";
+import { postSelect } from "@/lib/post-select";
 import { ZodError } from "zod";
 
 type Params = { params: Promise<{ id: string }> };

@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getTokenFromRequest, verifyAccessToken, unauthorizedResponse } from "@/lib/auth";
+import { emitRealtimeNotification } from "@/lib/realtime";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -25,10 +26,10 @@ export async function POST(req: NextRequest, { params }: Params) {
       return NextResponse.json({ success: false, error: "No pending request found" }, { status: 404 });
     }
 
-    await db.$transaction([
-      db.friendRequest.update({ where: { id: request.id }, data: { status: "ACCEPTED" } }),
-      db.friendship.create({ data: { userAId: senderId, userBId: receiverId } }),
-      db.notification.create({
+    const notification = await db.$transaction(async (tx: typeof db) => {
+      await tx.friendRequest.update({ where: { id: request.id }, data: { status: "ACCEPTED" } });
+      await tx.friendship.create({ data: { userAId: senderId, userBId: receiverId } });
+      const createdNotification = await tx.notification.create({
         data: {
           recipientId: senderId,
           triggerId:   receiverId,
@@ -37,8 +38,29 @@ export async function POST(req: NextRequest, { params }: Params) {
           entityType:  "user",
           message:     "accepted your friend request",
         },
-      }),
-    ]);
+      });
+
+      return createdNotification
+        ? tx.notification.findUnique({
+            where: { id: createdNotification.id },
+            include: {
+              trigger: {
+                select: {
+                  id: true,
+                  username: true,
+                  displayName: true,
+                  avatarUrl: true,
+                  isVerified: true,
+                },
+              },
+            },
+          })
+        : null;
+    });
+
+    if (notification) {
+      await emitRealtimeNotification(senderId, notification);
+    }
 
     return NextResponse.json({ success: true, message: "Friend request accepted" });
   } catch (error) {

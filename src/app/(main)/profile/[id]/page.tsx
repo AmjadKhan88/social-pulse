@@ -135,7 +135,7 @@ export default function ProfilePage({ params }: Props) {
       </div>
 
       {/* Profile header */}
-      <div className="px-4 sm:px-6">
+      <div className="px-4 sm:px-6 mt-10">
         <div className="flex items-end gap-4 -mt-14 sm:-mt-16 mb-4">
           <div className="relative group">
             <Avatar
@@ -144,7 +144,7 @@ export default function ProfilePage({ params }: Props) {
               size="2xl"
               isOnline={profile.isOnline}
               showStatus
-              className="ring-4 ring-white shadow-lg"
+              className="ring-4 ring-white rounded-full shadow-lg"
             />
             {isSelf && (
               <button

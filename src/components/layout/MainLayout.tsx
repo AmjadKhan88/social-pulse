@@ -6,13 +6,14 @@ import { usePathname } from "next/navigation";
 import {
   Home, Users, Bell, Search, User, Settings, LogOut, Zap, Menu, X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useAuthStore } from "@/store/auth.store";
 import { useNotificationStore } from "@/store/notification.store";
+import { useSocket } from "@/hooks/useSocket";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -25,9 +26,41 @@ const NAV_ITEMS = [
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname   = usePathname();
   const router     = useRouter();
-  const { user, clearAuth }  = useAuthStore();
+  const { user, setAuth, clearAuth }  = useAuthStore();
   const { reset: resetNotif } = useNotificationStore();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useSocket();
+
+  useEffect(() => {
+    if (!user) return;
+
+    let cancelled = false;
+
+    async function refreshSession() {
+      try {
+        const res = await fetch("/api/auth/refresh", {
+          method: "POST",
+          credentials: "include",
+        });
+
+        if (!res.ok) return;
+
+        const json = await res.json();
+        if (!cancelled && json.success) {
+          setAuth(json.data.user, json.data.accessToken);
+        }
+      } catch {
+        // Keep the current UI; server/API guards will handle truly expired sessions.
+      }
+    }
+
+    refreshSession();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [setAuth, user?.id]);
 
   async function handleLogout() {
     try {

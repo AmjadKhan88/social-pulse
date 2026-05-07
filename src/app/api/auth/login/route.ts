@@ -5,7 +5,7 @@ import {
   verifyPassword,
   signAccessToken,
   signRefreshToken,
-  setAuthCookies,
+  applyAuthCookies,
 } from "@/lib/auth";
 import { loginSchema } from "@/lib/validations";
 import { ZodError } from "zod";
@@ -78,15 +78,14 @@ export async function POST(req: NextRequest) {
       }),
     ]);
 
-    await setAuthCookies(accessToken, refreshToken);
-
     const { passwordHash: _, ...safeUser } = user;
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "Logged in successfully",
       data: { user: safeUser, accessToken },
     });
+
+    return applyAuthCookies(response, accessToken, refreshToken);
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(

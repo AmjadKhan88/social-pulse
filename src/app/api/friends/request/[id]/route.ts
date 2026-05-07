@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getTokenFromRequest, verifyAccessToken, unauthorizedResponse } from "@/lib/auth";
+import { emitRealtimeNotification } from "@/lib/realtime";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -63,9 +64,10 @@ export async function POST(req: NextRequest, { params }: Params) {
       return NextResponse.json({ success: true, message: "Friend request accepted automatically" });
     }
 
-    const request = await db.$transaction(async (tx) => {
+    const { request, notification } = await db.$transaction(async (tx: typeof db) => {
       const req = await tx.friendRequest.create({ data: { senderId, receiverId, status: "PENDING" } });
-      await tx.notification.create({
+      if (!req) throw new Error("Friend request was not created");
+      const createdNotification = await tx.notification.create({
         data: {
           recipientId: receiverId,
           triggerId:   senderId,
@@ -75,8 +77,29 @@ export async function POST(req: NextRequest, { params }: Params) {
           message:     "sent you a friend request",
         },
       });
-      return req;
+      const hydratedNotification = createdNotification
+        ? await tx.notification.findUnique({
+            where: { id: createdNotification.id },
+            include: {
+              trigger: {
+                select: {
+                  id: true,
+                  username: true,
+                  displayName: true,
+                  avatarUrl: true,
+                  isVerified: true,
+                },
+              },
+            },
+          })
+        : null;
+
+      return { request: req, notification: hydratedNotification };
     });
+
+    if (notification) {
+      await emitRealtimeNotification(receiverId, notification);
+    }
 
     return NextResponse.json({ success: true, message: "Friend request sent", data: request }, { status: 201 });
   } catch (error) {

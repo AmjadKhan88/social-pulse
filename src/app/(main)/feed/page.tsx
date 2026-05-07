@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import { CreatePost } from "@/components/posts/CreatePost";
 import { PostCard }   from "@/components/posts/PostCard";
 import { FriendSuggestions } from "@/components/friends/FriendSuggestions";
-import { useSocket } from "@/hooks/useSocket";
 import type { Post } from "@/types";
 
 export default function FeedPage() {
@@ -18,8 +17,6 @@ export default function FeedPage() {
   const [hasMore,    setHasMore]   = useState(true);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
-
-  useSocket(); // Initialize socket connection
 
   const fetchPosts = useCallback(async (cursor?: string) => {
     if (cursor) setLoadingMore(true);

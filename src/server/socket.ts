@@ -3,12 +3,53 @@
 // Run separately: tsx src/server/socket.ts
 
 import { createServer } from "http";
+import { loadEnvConfig } from "@next/env";
 import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
 
-const db = new PrismaClient();
-const httpServer = createServer();
+loadEnvConfig(process.cwd());
+
+const { db } = await import("../lib/db");
+
+const httpServer = createServer((req, res) => {
+  if (req.method !== "POST" || req.url !== "/emit-notification") {
+    res.writeHead(404);
+    res.end();
+    return;
+  }
+
+  if (
+    process.env.SOCKET_INTERNAL_SECRET &&
+    req.headers["x-socket-secret"] !== process.env.SOCKET_INTERNAL_SECRET
+  ) {
+    res.writeHead(401);
+    res.end(JSON.stringify({ success: false, error: "Unauthorized" }));
+    return;
+  }
+
+  let body = "";
+  req.on("data", (chunk) => {
+    body += chunk;
+  });
+
+  req.on("end", () => {
+    try {
+      const { recipientId, notification } = JSON.parse(body);
+      if (!recipientId || !notification) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ success: false, error: "Invalid payload" }));
+        return;
+      }
+
+      emitNotification(recipientId, notification);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: true }));
+    } catch {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: false, error: "Invalid JSON" }));
+    }
+  });
+});
 
 const io = new Server(httpServer, {
   cors: {
@@ -162,6 +203,7 @@ async function getFriendIds(userId: string): Promise<string[]> {
 // Export a function to emit notifications (used in same process)
 export function emitNotification(recipientId: string, notification: unknown) {
   io.to(`user:${recipientId}`).emit("notification:new", notification);
+  io.to(`user:${recipientId}`).emit("friend-request:new", notification);
 }
 
 // ─────────────────────────────────────────

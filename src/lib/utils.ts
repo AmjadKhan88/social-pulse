@@ -15,6 +15,7 @@ export function cn(...inputs: ClassValue[]) {
 // ─────────────────────────────────────────
 export function formatRelativeTime(date: string | Date): string {
   const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return "";
   if (isToday(d)) {
     return formatDistanceToNow(d, { addSuffix: true });
   }
@@ -25,7 +26,9 @@ export function formatRelativeTime(date: string | Date): string {
 }
 
 export function formatFullDate(date: string | Date): string {
-  return format(new Date(date), "MMMM d, yyyy 'at' h:mm a");
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return "";
+  return format(d, "MMMM d, yyyy 'at' h:mm a");
 }
 
 // ─────────────────────────────────────────

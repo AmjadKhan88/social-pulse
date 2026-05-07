@@ -52,6 +52,12 @@ export function useSocket() {
       addNotification(notification);
     });
 
+    socket.on("friend-request:new", (notification: Notification) => {
+      window.dispatchEvent(
+        new CustomEvent("friend-request:new", { detail: notification })
+      );
+    });
+
     socketInstance = socket;
     socketRef.current = socket;
 

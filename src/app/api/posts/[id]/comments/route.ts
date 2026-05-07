@@ -94,7 +94,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     });
     if (!post) return NextResponse.json({ success: false, error: "Post not found" }, { status: 404 });
 
-    const comment = await db.$transaction(async (tx) => {
+    const comment = await db.$transaction(async (tx: typeof db) => {
       const newComment = await tx.comment.create({
         data: {
           postId,

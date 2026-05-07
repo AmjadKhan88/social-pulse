@@ -5,7 +5,7 @@ import {
   hashPassword,
   signAccessToken,
   signRefreshToken,
-  setAuthCookies,
+  applyAuthCookies,
 } from "@/lib/auth";
 import { registerSchema } from "@/lib/validations";
 import { ZodError } from "zod";
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     const passwordHash = await hashPassword(data.password);
 
     // Create user + default privacy settings in a transaction
-    const user = await db.$transaction(async (tx) => {
+    const user = await db.$transaction(async (tx: typeof db) => {
       const newUser = await tx.user.create({
         data: {
           email: data.email,
@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
           isVerified: true,
         },
       });
+      if (!newUser) throw new Error("User was not created");
 
       // Create default privacy settings
       await tx.privacySettings.create({
@@ -88,9 +89,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    await setAuthCookies(accessToken, refreshToken);
-
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: true,
         message: "Account created successfully",
@@ -108,6 +107,8 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
+
+    return applyAuthCookies(response, accessToken, refreshToken);
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(

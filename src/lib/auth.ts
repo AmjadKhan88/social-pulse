@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/db";
 import type { JWTPayload, AuthUser } from "@/types";
 
 const ACCESS_SECRET  = process.env.JWT_ACCESS_SECRET!;
@@ -76,10 +77,38 @@ export async function setAuthCookies(accessToken: string, refreshToken: string):
   });
 }
 
+export function applyAuthCookies(response: NextResponse, accessToken: string, refreshToken: string): NextResponse {
+  response.cookies.set("access_token", accessToken, {
+    ...COOKIE_CONFIG,
+    maxAge: 60 * 15,
+  });
+
+  response.cookies.set("refresh_token", refreshToken, {
+    ...COOKIE_CONFIG,
+    maxAge: 60 * 60 * 24 * 7,
+  });
+
+  return response;
+}
+
 export async function clearAuthCookies(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete("access_token");
   cookieStore.delete("refresh_token");
+}
+
+export function applyClearAuthCookies(response: NextResponse): NextResponse {
+  response.cookies.set("access_token", "", {
+    ...COOKIE_CONFIG,
+    maxAge: 0,
+  });
+
+  response.cookies.set("refresh_token", "", {
+    ...COOKIE_CONFIG,
+    maxAge: 0,
+  });
+
+  return response;
 }
 
 // ─────────────────────────────────────────
@@ -107,20 +136,48 @@ export function getRefreshTokenFromRequest(req: NextRequest): string | null {
 export async function getAuthUser(): Promise<AuthUser | null> {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get("access_token")?.value;
-    if (!token) return null;
+    const accessToken = cookieStore.get("access_token")?.value;
 
-    const payload = verifyAccessToken(token);
-    if (!payload) return null;
+    if (accessToken) {
+      const payload = verifyAccessToken(accessToken);
+      if (payload) {
+        return {
+          id: payload.sub,
+          email: payload.email,
+          username: payload.username,
+          displayName: payload.displayName ?? payload.username,
+          avatarUrl: payload.avatarUrl ?? null,
+          isVerified: payload.isVerified ?? false,
+        };
+      }
+    }
 
-    return {
-      id: payload.sub,
-      email: payload.email,
-      username: payload.username,
-      displayName: payload.displayName ?? payload.username,
-      avatarUrl: payload.avatarUrl ?? null,
-      isVerified: payload.isVerified ?? false,
-    };
+    const refreshToken = cookieStore.get("refresh_token")?.value;
+    if (!refreshToken) return null;
+
+    const refreshPayload = verifyRefreshToken(refreshToken);
+    if (!refreshPayload) return null;
+
+    const stored = await db.refreshToken.findUnique({
+      where: { token: refreshToken },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            displayName: true,
+            avatarUrl: true,
+            isVerified: true,
+          },
+        },
+      },
+    });
+
+    if (!stored || new Date(stored.expiresAt) < new Date()) return null;
+    if (!stored.user || stored.user.id !== refreshPayload.sub) return null;
+
+    return stored.user;
   } catch {
     return null;
   }

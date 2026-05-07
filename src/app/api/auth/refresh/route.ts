@@ -5,7 +5,7 @@ import {
   verifyRefreshToken,
   signAccessToken,
   signRefreshToken,
-  setAuthCookies,
+  applyAuthCookies,
   getRefreshTokenFromRequest,
 } from "@/lib/auth";
 
@@ -76,12 +76,12 @@ export async function POST(req: NextRequest) {
       }),
     ]);
 
-    await setAuthCookies(newAccessToken, newRefreshToken);
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: { user, accessToken: newAccessToken },
     });
+
+    return applyAuthCookies(response, newAccessToken, newRefreshToken);
   } catch (error) {
     console.error("[REFRESH_ERROR]", error);
     return NextResponse.json(

@@ -3,7 +3,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-hot-toast";
@@ -21,7 +20,6 @@ const passwordRules = [
 ];
 
 export default function RegisterPage() {
-  const router = useRouter();
   const { setAuth } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [passwordValue, setPasswordValue] = useState("");
@@ -38,6 +36,7 @@ export default function RegisterPage() {
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
@@ -52,8 +51,7 @@ export default function RegisterPage() {
 
       setAuth(json.data.user, json.data.accessToken);
       toast.success("Account created! Welcome to SocialSphere 🎉");
-      router.push("/feed");
-      router.refresh();
+      window.location.assign("/feed");
     } catch {
       toast.error("Something went wrong. Please try again.");
     }

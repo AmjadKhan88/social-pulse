@@ -272,7 +272,7 @@ final-project/
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `DATABASE_URL` | ✅ | PostgreSQL connection string |
+| `MONGODB_URI` | ✅ | MongoDB connection string |
 | `JWT_ACCESS_SECRET` | ✅ | Secret for access tokens (min 32 chars) |
 | `JWT_REFRESH_SECRET` | ✅ | Secret for refresh tokens (min 32 chars) |
 | `CLOUDINARY_CLOUD_NAME` | ✅ | Cloudinary cloud name |
@@ -312,11 +312,10 @@ Set environment variables in the Vercel dashboard.
   startCommand = "tsx src/server/socket.ts"
 ```
 
-### Database (Supabase / Neon / Railway)
+### Database (MongoDB Atlas / Local MongoDB / Railway)
 
 ```bash
-# After setting DATABASE_URL:
-npx prisma migrate deploy
+# After setting MONGODB_URI:
 npm run db:seed
 ```
 

@@ -102,6 +102,7 @@ export async function POST(req: NextRequest) {
         sizeBytes: uploadResult.bytes,
       },
     });
+    if (!media) throw new Error("Media record was not created");
 
     // If avatar or cover, update user directly
     if (purpose === "avatar") {

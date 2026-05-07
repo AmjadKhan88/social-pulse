@@ -3,36 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getTokenFromRequest, verifyAccessToken, unauthorizedResponse } from "@/lib/auth";
 import { createPostSchema, paginationSchema } from "@/lib/validations";
+import { postSelect } from "@/lib/post-select";
 import { ZodError } from "zod";
-
-// Helper: post select shape (reused across routes)
-export const postSelect = {
-  id: true,
-  content: true,
-  audience: true,
-  isEdited: true,
-  isPinned: true,
-  createdAt: true,
-  updatedAt: true,
-  author: {
-    select: {
-      id: true,
-      username: true,
-      displayName: true,
-      avatarUrl: true,
-      isVerified: true,
-      isOnline: true,
-      privacySettings: { select: { showOnlineStatus: true } },
-    },
-  },
-  media: {
-    include: { media: true },
-    orderBy: { order: "asc" as const },
-  },
-  _count: {
-    select: { comments: true, likes: true, reactions: true },
-  },
-};
 
 // ─────────────────────────────────────────
 // GET /api/posts — Feed or user posts
@@ -50,44 +22,31 @@ export async function GET(req: NextRequest) {
     });
     const userId = searchParams.get("userId"); // Filter by author
 
-    // Build audience filter based on viewer
-    const audienceFilter = viewerId
-      ? {
-          OR: [
-            { audience: "PUBLIC" as const },
-            {
-              audience: "FRIENDS" as const,
-              author: {
-                OR: [
-                  { friendshipsA: { some: { userBId: viewerId } } },
-                  { friendshipsB: { some: { userAId: viewerId } } },
-                ],
-              },
-            },
-            ...(viewerId ? [{ authorId: viewerId }] : []),
-          ],
-        }
-      : { audience: "PUBLIC" as const };
+    const friendIds = viewerId ? await getFriendIds(viewerId) : [];
 
-    // Feed: friend posts + own posts, OR profile posts for a specific user
+    // Feed: public posts, friends-only posts from friends, and own posts.
     const where = userId
-      ? { authorId: userId, ...audienceFilter }
+      ? {
+          authorId: userId,
+          OR:
+            viewerId === userId
+              ? [{ audience: { in: ["PUBLIC", "FRIENDS", "ONLY_ME"] as const } }]
+              : [
+                  { audience: "PUBLIC" as const },
+                  ...(friendIds.includes(userId) ? [{ audience: "FRIENDS" as const }] : []),
+                ],
+        }
       : viewerId
       ? {
           OR: [
             { authorId: viewerId },
-            {
-              author: {
-                OR: [
-                  { friendshipsA: { some: { userBId: viewerId } } },
-                  { friendshipsB: { some: { userAId: viewerId } } },
-                ],
-              },
-              ...audienceFilter,
-            },
+            { audience: "PUBLIC" as const },
+            ...(friendIds.length
+              ? [{ authorId: { in: friendIds }, audience: "FRIENDS" as const }]
+              : []),
           ],
         }
-      : audienceFilter;
+      : { audience: "PUBLIC" as const };
 
     const posts = await db.post.findMany({
       where,
@@ -134,6 +93,17 @@ export async function GET(req: NextRequest) {
   }
 }
 
+async function getFriendIds(userId: string): Promise<string[]> {
+  const friendships = await db.friendship.findMany({
+    where: { OR: [{ userAId: userId }, { userBId: userId }] },
+    select: { userAId: true, userBId: true },
+  });
+
+  return friendships.map((friendship) =>
+    friendship.userAId === userId ? friendship.userBId : friendship.userAId
+  );
+}
+
 // ─────────────────────────────────────────
 // POST /api/posts — Create post
 // ─────────────────────────────────────────
@@ -148,7 +118,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = createPostSchema.parse(body);
 
-    const post = await db.$transaction(async (tx) => {
+    const post = await db.$transaction(async (tx: typeof db) => {
       const newPost = await tx.post.create({
         data: {
           authorId: payload.sub,
@@ -157,6 +127,7 @@ export async function POST(req: NextRequest) {
         },
         select: { id: true },
       });
+      if (!newPost) throw new Error("Post was not created");
 
       // Attach media if provided
       if (data.mediaIds && data.mediaIds.length > 0) {

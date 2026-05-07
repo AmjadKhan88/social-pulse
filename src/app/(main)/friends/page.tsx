@@ -23,6 +23,15 @@ export default function FriendsPage() {
 
   useEffect(() => { fetchData(tab); }, [tab]);
 
+  useEffect(() => {
+    function handleFriendRequest() {
+      if (tab === "requests") fetchData("requests");
+    }
+
+    window.addEventListener("friend-request:new", handleFriendRequest);
+    return () => window.removeEventListener("friend-request:new", handleFriendRequest);
+  }, [tab]);
+
   async function fetchData(t: Tab) {
     setLoading(true);
     try {
