@@ -1,7 +1,7 @@
 // src/app/api/friends/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "../../../../lib/db";
-import { getTokenFromRequest, verifyAccessToken, unauthorizedResponse } from "../../../../lib/auth";
+import { db } from "@/lib/db";
+import { getTokenFromRequest, verifyAccessToken, unauthorizedResponse } from "@/lib/auth";
 
 type Params = { params: Promise<{ id: string }> };
 

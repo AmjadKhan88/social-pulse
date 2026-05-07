@@ -4,10 +4,10 @@
 import { useState, useRef } from "react";
 import { Image as ImageIcon, Video, Globe, Users, Lock, X, Send } from "lucide-react";
 import toast from "react-hot-toast";
-import { Avatar } from "../../components/ui/Avatar";
-import { Button } from "../../components/ui/Button";
-import { useAuthStore } from "../../store/auth.store";
-import type { Post, PostAudience } from "../../types";
+import { Avatar } from "@/components/ui/Avatar";
+import { Button } from "@/components/ui/Button";
+import { useAuthStore } from "@/store/auth.store";
+import type { Post, PostAudience } from "@/types";
 
 interface Props {
   onPostCreated: (post: Post) => void;

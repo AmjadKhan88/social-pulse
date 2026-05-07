@@ -4,11 +4,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Heart, Reply, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
-import { Avatar } from "../../components/ui/Avatar";
-import { Button } from "../../components/ui/Button";
-import { useAuthStore } from "../../store/auth.store";
-import { formatRelativeTime } from "../../lib/utils";
-import type { Comment } from "../../types";
+import { Avatar } from "@/components/ui/Avatar";
+import { Button } from "@/components/ui/Button";
+import { useAuthStore } from "@/store/auth.store";
+import { formatRelativeTime } from "@/lib/utils";
+import type { Comment } from "@/types";
 
 interface Props {
   postId: string;

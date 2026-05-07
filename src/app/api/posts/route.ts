@@ -1,8 +1,8 @@
 // src/app/api/posts/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "../../../lib/db";
-import { getTokenFromRequest, verifyAccessToken, unauthorizedResponse } from "../../../lib/auth";
-import { createPostSchema, paginationSchema } from "../../../lib/validations";
+import { db } from "@/lib/db";
+import { getTokenFromRequest, verifyAccessToken, unauthorizedResponse } from "@/lib/auth";
+import { createPostSchema, paginationSchema } from "@/lib/validations";
 import { ZodError } from "zod";
 
 // Helper: post select shape (reused across routes)

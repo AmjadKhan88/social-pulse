@@ -1,8 +1,8 @@
 // src/app/api/posts/[id]/comments/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "../../../../../lib/db";
-import { getTokenFromRequest, verifyAccessToken, unauthorizedResponse } from "../../../../../lib/auth";
-import { createCommentSchema, paginationSchema } from "../../../../..//lib/validations";
+import { db } from "@/lib/db";
+import { getTokenFromRequest, verifyAccessToken, unauthorizedResponse } from "@/lib/auth";
+import { createCommentSchema, paginationSchema } from "@/lib/validations";
 import { ZodError } from "zod";
 
 type Params = { params: Promise<{ id: string }> };

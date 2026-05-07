@@ -1,8 +1,8 @@
 // src/app/api/posts/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "../../../../lib/db";
-import { getTokenFromRequest, verifyAccessToken, unauthorizedResponse, forbiddenResponse } from "../../../../lib/auth";
-import { updatePostSchema } from "../../../../lib/validations";
+import { db } from "@/lib/db";
+import { getTokenFromRequest, verifyAccessToken, unauthorizedResponse, forbiddenResponse } from "@/lib/auth";
+import { updatePostSchema } from "@/lib/validations";
 import { postSelect } from "../route";
 import { ZodError } from "zod";
 

@@ -6,12 +6,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Camera, Upload } from "lucide-react";
 import toast from "react-hot-toast";
-import { Avatar } from "../ui/Avatar";
-import { Button } from "../ui/Button";
-import { Input, Textarea } from "../ui/Input";
-import { updateProfileSchema, type UpdateProfileInput } from "../../lib/validations";
-import { useAuthStore } from "../../store/auth.store";
-import type { UserProfile } from "../../types";
+import { Avatar } from "@/components/ui/Avatar";
+import { Button } from "@/components/ui/Button";
+import { Input, Textarea } from "@/components/ui/Input";
+import { updateProfileSchema, type UpdateProfileInput } from "@/lib/validations";
+import { useAuthStore } from "@/store/auth.store";
+import type { UserProfile } from "@/types";
 
 interface Props {
   profile: UserProfile;

@@ -15,7 +15,6 @@ const prismaOptions: any = {
 if (process.env.PRISMA_ACCELERATE_URL) {
   prismaOptions.accelerateUrl = process.env.PRISMA_ACCELERATE_URL;
 } else if (process.env.DATABASE_URL) {
-  // For direct DB connections pass an adapter object with the URL
   prismaOptions.adapter = { url: process.env.DATABASE_URL };
 }
 

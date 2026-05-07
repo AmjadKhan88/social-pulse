@@ -1,4 +1,7 @@
-
+# ─────────────────────────────────────────────────────
+# SocialSphere .gitignore
+# Staged Commit Strategy: Remove future-day entries
+# one by one as you complete each day's work
 # ─────────────────────────────────────────────────────
 
 # ── Core ignores ──────────────────────────────────────
@@ -40,4 +43,27 @@ Thumbs.db
 # ── TypeScript ────────────────────────────────────────
 *.tsbuildinfo
 
+# ── Prisma ────────────────────────────────────────────
+# Don't ignore schema — only migrations if not ready
+# prisma/migrations/
 
+# ─────────────────────────────────────────────────────
+# STAGED COMMIT STRATEGY
+# Remove each line below when you start that day's work
+# This prevents future days from being accidentally committed
+# ─────────────────────────────────────────────────────
+# day-2-auth/*          ← Remove on Day 2
+# day-3-profile/*       ← Remove on Day 3
+# day-4-posts/*         ← Remove on Day 4
+# day-5-comments-likes/* ← Remove on Day 5
+# day-6-friends/*       ← Remove on Day 6
+# day-7-realtime/*      ← Remove on Day 7
+# day-8-notifications/* ← Remove on Day 8
+# day-9-privacy/*       ← Remove on Day 9
+# day-10-final-polish/* ← Remove on Day 10
+
+# Strategy:
+# Before each day's first commit, remove that day's
+# line from this file, then stage and commit that
+# .gitignore change as the first commit of the day.
+# This creates a realistic, honest commit history.

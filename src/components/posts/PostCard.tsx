@@ -10,12 +10,12 @@ import {
   ThumbsUp, Laugh, Frown, Angry, Eye,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { Avatar } from "../../components/ui/Avatar";
-import { Button } from "../../components/ui/Button";
-import { CommentSection } from "../../components/posts/CommentSection";
-import { useAuthStore } from "../../store/auth.store";
-import { formatRelativeTime } from "../../lib/utils";
-import type { Post, ReactionType } from "../../types";
+import { Avatar } from "@/components/ui/Avatar";
+import { Button } from "@/components/ui/Button";
+import { CommentSection } from "@/components/posts/CommentSection";
+import { useAuthStore } from "@/store/auth.store";
+import { formatRelativeTime } from "@/lib/utils";
+import type { Post, ReactionType } from "@/types";
 
 interface Props {
   post: Post;
@@ -324,7 +324,7 @@ export function PostCard({ post, onUpdate, onDelete }: Props) {
       </div>
 
       {/* Comments */}
-       {showComments && <CommentSection postId={post.id} commentCount={currentPost._count.comments} />}
+      {showComments && <CommentSection postId={post.id} commentCount={currentPost._count.comments} />}
     </article>
   );
 }
