@@ -7,14 +7,7 @@ import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 
-const prismaOptions: any = {};
-if (process.env.PRISMA_ACCELERATE_URL) {
-  prismaOptions.accelerateUrl = process.env.PRISMA_ACCELERATE_URL;
-} else if (process.env.DATABASE_URL) {
-  prismaOptions.adapter = { url: process.env.DATABASE_URL };
-}
-
-const db = new PrismaClient(prismaOptions);
+const db = new PrismaClient();
 const httpServer = createServer();
 
 const io = new Server(httpServer, {

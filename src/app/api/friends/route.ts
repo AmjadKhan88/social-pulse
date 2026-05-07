@@ -68,6 +68,8 @@ export async function GET(req: NextRequest) {
       select: {
         id: true,
         createdAt: true,
+        userAId: true,
+        userBId: true,
         userA: { select: friendUserSelect },
         userB: { select: friendUserSelect },
       },

@@ -33,6 +33,7 @@ const config: Config = {
           "dark-subtle": "#1e293b",
           "dark-muted":  "#334155",
         },
+        border: "var(--surface-border)",
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],

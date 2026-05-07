@@ -4,15 +4,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-const prismaOptions: any = {};
-
-if (process.env.PRISMA_ACCELERATE_URL) {
-  prismaOptions.accelerateUrl = process.env.PRISMA_ACCELERATE_URL;
-} else if (process.env.DATABASE_URL) {
-  prismaOptions.adapter = { url: process.env.DATABASE_URL };
-}
-
-const db = new PrismaClient(prismaOptions);
+const db = new PrismaClient();
 
 const DEMO_USERS = [
   {
